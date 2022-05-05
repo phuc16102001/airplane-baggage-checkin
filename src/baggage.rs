@@ -1,0 +1,27 @@
+use near_sdk::{serde::{Serialize, Deserialize}};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};  
+use crate::types::*;
+
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Baggage {
+    baggage_id: BaggageId,
+    baggage_size: Weight
+}
+
+impl Baggage {
+    pub fn new(baggage_id: BaggageId, baggage_size: Weight) -> Self {
+        Self {
+            baggage_id,
+            baggage_size
+        }
+    }
+
+    pub fn get_id(&self) -> BaggageId {
+        self.baggage_id
+    }
+    
+    pub fn get_size(&self) -> Weight {
+        self.baggage_size
+    }
+}
