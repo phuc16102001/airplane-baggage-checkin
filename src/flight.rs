@@ -8,18 +8,26 @@ use crate::baggage::Baggage;
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
+
 pub enum FlightClass {
     First,
     Business,
     Economy
 }
 
-#[derive(BorshDeserialize, BorshSerialize)]
+pub enum FlightState {
+    Idle,
+    Checked,
+    Transporting,
+    Claimed
+}
+
 pub struct Flight {
     _flight_id: FlightId,
     _flight_class: FlightClass, 
     _distance: Distance,
     _baggages: UnorderedMap<BaggageId, Baggage>,
+    _state: FlightState
 }
 
 impl Flight {
@@ -32,7 +40,8 @@ impl Flight {
             _flight_id,
             _flight_class,
             _distance,
-            _baggages: UnorderedMap::new(b"baggages".to_vec())
+            _baggages: UnorderedMap::new(b"baggages".to_vec()),
+            _state: FlightState::Idle
         }
     }
 
