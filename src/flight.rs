@@ -1,6 +1,7 @@
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{serde::{Serialize, Deserialize}};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};  
+use near_sdk::env;
 
 use crate::fee::*;
 use crate::types::*;
@@ -25,7 +26,7 @@ pub enum FlightState {
 
 
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct Flight {
+pub struct FlightDetail {
     flight_id: FlightId,
     flight_class: FlightClass, 
     distance: Distance,
@@ -33,23 +34,24 @@ pub struct Flight {
     state: FlightState
 }
 
-impl Flight {
+impl FlightDetail {
     pub fn new(
         flight_id: FlightId,
         flight_class: FlightClass,
         distance: Distance,
     ) -> Self {
+        env::log(format!("baggages_{}",flight_id).as_bytes());
         Self {
             flight_id,
             flight_class,
             distance,
-            baggages: UnorderedMap::new(b"baggages".to_vec()),
+            baggages: UnorderedMap::new(format!("baggages_{}",flight_id).as_bytes()),
             state: FlightState::Idle
         }
     }
 
     pub fn add_baggage(&mut self, baggage: Baggage) {
-        self.baggages.insert(&baggage.get_id(), &baggage);
+        self.baggages.insert(baggage.get_id(), &baggage);
     }
 
     pub fn remove_baggage(&mut self, baggage_id: BaggageId) {
@@ -64,16 +66,16 @@ impl Flight {
         self.state = new_state;
     }
 
-    pub fn get_flight_id(&self) -> FlightId{
-        self.flight_id
+    pub fn get_flight_id(&mut self) -> &FlightId{
+        &self.flight_id
     }
 
     pub fn get_flight_class(&self) -> &FlightClass{
         &self.flight_class
     }
     
-    pub fn get_distance(&self) -> Distance{
-        self.distance
+    pub fn get_distance(&self) -> &Distance{
+        &self.distance
     }
     
     pub fn get_baggages(&self) -> &UnorderedMap<BaggageId, Baggage>{

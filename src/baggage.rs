@@ -15,11 +15,11 @@ impl Baggage {
         }
     }
 
-    pub fn get_id(&self) -> BaggageId {
-        self.baggage_id
+    pub fn get_id(&self) -> &BaggageId {
+        &self.baggage_id
     }
     
-    pub fn get_weight(&self) -> Weight {
-        self.baggage_weight
+    pub fn get_weight(&self) -> &Weight {
+        &self.baggage_weight
     }
 }

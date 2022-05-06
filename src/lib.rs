@@ -20,8 +20,8 @@ pub struct Contract {
     owner: AccountId,
     payment_account: AccountId,
     initialized: bool,
-
-    user_flights: UnorderedMap<(AccountId, FlightId), Flight>,
+    user_flights: UnorderedMap<(AccountId, FlightId), FlightDetail>,
+    count_baggage: BaggageId
 }
 
 impl Default for Contract {
@@ -30,7 +30,8 @@ impl Default for Contract {
             owner: env::signer_account_id(),
             payment_account: env::predecessor_account_id(),
             initialized: false,
-            user_flights: UnorderedMap::new(b"user_flights".to_vec())
+            user_flights: UnorderedMap::new(b"user_flights".to_vec()),
+            count_baggage: 0
         }
     }
 }
@@ -129,7 +130,7 @@ impl Contract {
                 panic!("This flight was registered by you");
             },
             None => {
-                let new_flight = Flight::new(
+                let new_flight = FlightDetail::new(
                     flight_id,
                     flight_class,
                     distance
@@ -145,25 +146,30 @@ impl Contract {
     
         let customer_id = env::predecessor_account_id();
         let key = &(customer_id, flight_id);
+
         match self.user_flights.get(&key) {
             Some(mut flight) => {
-                let baggages = flight.get_baggages();
                         
                 // Each (account, flight) can only have at most 3
-                let baggage_len: usize = baggages.len() as usize;
+                let baggage_len: usize = flight.get_baggages().len() as usize;
                 if baggage_len>=3 {
                     panic!("You cannot add more than 3 baggages"); 
                 } else {
-                    let baggage_id: BaggageId = baggage_len;
+                    let baggage_id: BaggageId = self.count_baggage;
+                    let new_baggage = Baggage::new (
+                        baggage_id,
+                        baggage_weight
+                    );
+                    env::log(format!("Baggage size: {}",flight.get_baggages().len()).as_bytes());
 
                     flight.add_baggage(
-                        Baggage::new(
-                            baggage_id,
-                            baggage_weight
-                        )
+                        new_baggage
                     );
+                    self.user_flights.insert(&key,&flight);
+                    self.count_baggage += 1;
 
                     env::log("Add baggage succesfully".as_bytes());
+                    env::log(format!("Baggage size: {}",flight.get_baggages().len()).as_bytes());
                     env::log(format!("Baggage id: {}",&baggage_id).as_bytes());
                 }
             },
@@ -311,6 +317,10 @@ impl Contract {
             }
         }
 
+    }
+
+    pub fn get_count_list(&self) -> usize{
+        self.user_flights.len() as usize
     }
 
     // ===============================================

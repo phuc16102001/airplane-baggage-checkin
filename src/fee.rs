@@ -23,8 +23,8 @@ fn sum_weight(baggages: &UnorderedMap<BaggageId, Baggage>) -> Weight{
 fn max_weight(baggages: &UnorderedMap<BaggageId, Baggage>) -> Weight{
     let mut ret: Weight = 0.0;
     for baggage in baggages.values() {
-        if baggage.get_weight()>ret {
-            ret = baggage.get_weight();
+        if *(baggage.get_weight()) > ret {
+            ret = *(baggage.get_weight());
         }
     }
     ret
