@@ -3,12 +3,12 @@ use near_sdk::{env, near_bindgen, Promise};
 use near_sdk::{AccountId};
 use near_sdk::collections::{UnorderedMap};
 
-mod flight;
+mod flight_detail;
 mod baggage;
 mod types;
 mod fee;
 
-use crate::flight::*;
+use crate::flight_detail::*;
 use crate::baggage::*;
 use crate::types::*;
 
@@ -216,6 +216,7 @@ impl Contract {
             }
         }
     }
+
     pub fn check_state(&mut self, flight_id: FlightId) {
         self.assert_initialized();
         
@@ -224,7 +225,24 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(flight) => {        
-                // env::log(format!("State: {:?}",flight.get_state()).as_bytes());
+                env::log(format!("State: {:?}",flight.get_state()).as_bytes());
+            },
+            None => {
+                panic!("Cannot find your flight");
+            }
+        }
+    }
+
+    
+    pub fn check_class(&mut self, flight_id: FlightId) {
+        self.assert_initialized();
+        
+        let customer_id = env::predecessor_account_id();
+        let key = &(customer_id, flight_id);
+
+        match self.user_flights.get(&key) {
+            Some(flight) => {        
+                env::log(format!("Class: {:?}",flight.get_flight_class()).as_bytes());
             },
             None => {
                 panic!("Cannot find your flight");
@@ -250,6 +268,7 @@ impl Contract {
                 );
 
                 flight.set_state(FlightState::Checked);
+                self.user_flights.insert(&key,&flight);
                 env::log("Your baggages are checked".as_bytes());
             },
             None => {
@@ -295,14 +314,14 @@ impl Contract {
         }
     }
 
-    pub fn transport_baggage(&mut self, customer_id: AccountId, flight_id: FlightId) {
+    pub fn deliver_baggage(&mut self, customer_id: AccountId, flight_id: FlightId) {
         self.assert_initialized();
 
         let key = &(customer_id, flight_id);
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
-                flight.set_state(FlightState::Transported);
+                flight.set_state(FlightState::Delivered);
                 self.user_flights.insert(&key,&flight);
             },
             None => {

@@ -9,6 +9,7 @@ use crate::baggage::*;
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
+#[derive(Debug)]
 pub enum FlightClass {
     First,
     Business,
@@ -17,10 +18,11 @@ pub enum FlightClass {
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
+#[derive(Debug)]
 pub enum FlightState {
     Idle,
     Checked,
-    Transported,
+    Delivered,
     Claimed
 }
 
@@ -65,8 +67,8 @@ impl FlightDetail {
         self.state = new_state;
     }
 
-    pub fn get_state(&self) -> FlightState {
-        self.state
+    pub fn get_state(&self) -> &FlightState {
+        &self.state
     }
 
     pub fn get_flight_id(&mut self) -> &FlightId{
