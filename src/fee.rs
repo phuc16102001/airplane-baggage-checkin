@@ -35,7 +35,7 @@ pub struct FirstFee {}
 impl FeeStrategy for FirstFee {
     fn calculate_fee(
         &self,
-        distance: Distance,
+        _distance: Distance,
         baggages: &UnorderedMap<BaggageId, Baggage>
     ) -> Price {
         ((sum_weight(baggages)-max_weight(baggages)) as Price)*2*10u128.pow(18)
@@ -47,7 +47,7 @@ pub struct BusinessFee {}
 impl FeeStrategy for BusinessFee {
     fn calculate_fee(
         &self,
-        distance: Distance,
+        _distance: Distance,
         baggages: &UnorderedMap<BaggageId, Baggage>
     ) -> Price {
         (sum_weight(baggages) as Price)*2*10u128.pow(18)

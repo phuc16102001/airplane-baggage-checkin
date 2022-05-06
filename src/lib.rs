@@ -1,5 +1,4 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::env::sha256;
 use near_sdk::{env, near_bindgen, Promise};
 use near_sdk::{AccountId};
 use near_sdk::collections::{UnorderedMap};
@@ -39,8 +38,9 @@ impl Default for Contract {
 #[near_bindgen]
 impl Contract {
 
-    fn debug(&self) {
+    fn _debug(&self) {
         self.assert_initialized();
+
         let signer = env::signer_account_id();
         let predecessor = env::predecessor_account_id();
         let current = env::current_account_id();
