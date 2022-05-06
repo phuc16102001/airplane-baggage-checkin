@@ -1,7 +1,7 @@
+use near_sdk::Balance;
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{serde::{Serialize, Deserialize}};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};  
-use near_sdk::env;
 
 use crate::fee::*;
 use crate::types::*;
@@ -40,7 +40,6 @@ impl FlightDetail {
         flight_class: FlightClass,
         distance: Distance,
     ) -> Self {
-        env::log(format!("baggages_{}",flight_id).as_bytes());
         Self {
             flight_id,
             flight_class,
@@ -66,6 +65,10 @@ impl FlightDetail {
         self.state = new_state;
     }
 
+    pub fn get_state(&self) -> FlightState {
+        self.state
+    }
+
     pub fn get_flight_id(&mut self) -> &FlightId{
         &self.flight_id
     }
@@ -82,7 +85,7 @@ impl FlightDetail {
         &self.baggages
     }
 
-    pub fn get_price(&self) -> Price {
+    pub fn get_price(&self) -> Balance {
         self.get_fee_strategy().calculate_fee(
             self.distance,
             &self.baggages

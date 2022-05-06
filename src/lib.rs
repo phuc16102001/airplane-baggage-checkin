@@ -160,7 +160,6 @@ impl Contract {
                         baggage_id,
                         baggage_weight
                     );
-                    env::log(format!("Baggage size: {}",flight.get_baggages().len()).as_bytes());
 
                     flight.add_baggage(
                         new_baggage
@@ -169,7 +168,6 @@ impl Contract {
                     self.count_baggage += 1;
 
                     env::log("Add baggage succesfully".as_bytes());
-                    env::log(format!("Baggage size: {}",flight.get_baggages().len()).as_bytes());
                     env::log(format!("Baggage id: {}",&baggage_id).as_bytes());
                 }
             },
@@ -211,7 +209,22 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(flight) => {        
-                env::log(format!("Your price: {}NEAR",flight.get_price()).as_bytes());
+                env::log(format!("Your price: {} NEAR",flight.get_price()).as_bytes());
+            },
+            None => {
+                panic!("Cannot find your flight");
+            }
+        }
+    }
+    pub fn check_state(&mut self, flight_id: FlightId) {
+        self.assert_initialized();
+        
+        let customer_id = env::predecessor_account_id();
+        let key = &(customer_id, flight_id);
+
+        match self.user_flights.get(&key) {
+            Some(flight) => {        
+                // env::log(format!("State: {:?}",flight.get_state()).as_bytes());
             },
             None => {
                 panic!("Cannot find your flight");
@@ -231,9 +244,9 @@ impl Contract {
                 let fee = flight.get_price();
                 let deposit = env::attached_deposit();
                 assert_eq!(
-                    fee,
+                    to_yoto(fee),
                     deposit,
-                    "You must pay {}NEAR", fee
+                    "You must pay {} NEAR", fee
                 );
 
                 flight.set_state(FlightState::Checked);
@@ -255,6 +268,7 @@ impl Contract {
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
                 flight.remove_baggage(baggage_id);
+                self.user_flights.insert(&key,&flight);
                 env::log("Remove baggage successfully".as_bytes());
             },
             None => {
@@ -272,6 +286,7 @@ impl Contract {
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
                 flight.clear_baggages();
+                self.user_flights.insert(&key,&flight);
                 env::log("Remove all baggages successfully".as_bytes());
             },
             None => {
@@ -287,7 +302,8 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
-                flight.set_state(FlightState::Transported)
+                flight.set_state(FlightState::Transported);
+                self.user_flights.insert(&key,&flight);
             },
             None => {
                 panic!("Cannot find your flight");
@@ -306,11 +322,12 @@ impl Contract {
             Some(mut flight) => {        
                 self.remove_all_baggages(flight_id);
                 flight.set_state(FlightState::Claimed);
+                self.user_flights.insert(&key,&flight);
 
                 let payment_id = self.get_payment_account();
                 let amount = flight.get_price();
 
-                Promise::new(payment_id.to_string()).transfer(amount);
+                Promise::new(payment_id.to_string()).transfer(to_yoto(amount));
             },
             None => {
                 panic!("Cannot find your flight");

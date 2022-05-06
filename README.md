@@ -1,4 +1,5 @@
-# Introduction
+# Introduction - Airline baggage checking
+
 
 # Compile and build
 ```Bash
@@ -67,3 +68,12 @@ near call $CONTRACT_NAME claim_baggages '{"flight_id":1}' --accountId $CUSTOMER
 ```
 
 # Contribution
+This project was implemented by [phuc16102001](https://github.com/phuc16102001)
+
+You can reference from this, but **do not copy**
+
+These are the project which I have referenced from:
+- [Tin Writes Code](https://github.com/tinwritescode)
+- [Sample lottery](https://github.com/Learn-NEAR/NCD.L1.sample--lottery)
+- [Meme museum](https://github.com/Learn-NEAR/NCD.L1.sample--meme-museum)
+- [Cold chain delivery](https://github.com/Learn-NEAR/NCD.L1.sample--cold-chain-delivery)

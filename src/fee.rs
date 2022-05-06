@@ -1,3 +1,4 @@
+use near_sdk::Balance;
 use near_sdk::collections::{UnorderedMap};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};  
   
@@ -9,7 +10,7 @@ pub trait FeeStrategy {
         &self,
         distance: Distance,
         baggages: &UnorderedMap<BaggageId, Baggage>
-    ) -> Price;
+    ) -> Balance;
 }
 
 fn sum_weight(baggages: &UnorderedMap<BaggageId, Baggage>) -> Weight{
@@ -37,8 +38,8 @@ impl FeeStrategy for FirstFee {
         &self,
         _distance: Distance,
         baggages: &UnorderedMap<BaggageId, Baggage>
-    ) -> Price {
-        ((sum_weight(baggages)-max_weight(baggages)) as Price)*2*10u128.pow(18)
+    ) -> Balance {
+        ((sum_weight(baggages)-max_weight(baggages)) as Balance)*2
     }
 }
 
@@ -49,8 +50,8 @@ impl FeeStrategy for BusinessFee {
         &self,
         _distance: Distance,
         baggages: &UnorderedMap<BaggageId, Baggage>
-    ) -> Price {
-        (sum_weight(baggages) as Price)*2*10u128.pow(18)
+    ) -> Balance {
+        (sum_weight(baggages) as Balance)*2
     }
 }
 
@@ -61,7 +62,7 @@ impl FeeStrategy for EconomyFee {
         &self,
         distance: Distance,
         baggages:&UnorderedMap<BaggageId, Baggage>
-    ) -> Price {
-        ((sum_weight(baggages)+distance) as Price)*2*10u128.pow(18)
+    ) -> Balance {
+        ((sum_weight(baggages)+distance) as Balance)*2
     }
 }
