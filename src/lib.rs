@@ -24,7 +24,6 @@ pub struct Contract {
     count_baggage: BaggageId
 }
 
-#[near_bindgen]
 impl Default for Contract {
     fn default() -> Self {
         Self {
@@ -70,7 +69,7 @@ impl Contract {
         assert_eq!(
             self.initialized,
             false,
-            "Contract already initialized"
+            "Contract was already initialized"
         );
 
         // Only owner can init
@@ -181,7 +180,7 @@ impl Contract {
         }
     }
 
-    pub fn check_baggages(&mut self, flight_id: FlightId) -> Vec<Baggage>{
+    pub fn check_baggages(&mut self, flight_id: FlightId) {
         self.assert_initialized();
 
         let customer_id = env::predecessor_account_id();
@@ -189,7 +188,6 @@ impl Contract {
         match self.user_flights.get(&key) {
             Some(flight) => {
                 let baggages = flight.get_baggages();
-                let mut ret = Vec::new();
 
                 env::log(format!("Number of baggages: {}",baggages.len()).as_bytes());
                 for baggage in baggages.values(){
@@ -198,9 +196,7 @@ impl Contract {
                         baggage.get_id(), 
                         baggage.get_weight()
                     ).as_bytes());
-                    ret.push(baggage);
                 }
-                ret
             },
             None => {
                 panic!("Cannot find your flight");

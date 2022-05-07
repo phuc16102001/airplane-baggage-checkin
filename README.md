@@ -44,15 +44,20 @@ The contract has several steps:
 
 # Unit test
 ```Bash
-cargo test -- --nocapture
+cargo test
 ```
 
-# Compile and build
+# Manual test
+## Compile and build
 ```Bash
 ./build.sh
 ```
 
-# Manual test
+## Dev deploy
+```Bash
+./dev-deploy.sh
+```
+
 ## Create variables
 ```Bash
 source 'neardev/dev-account.env'

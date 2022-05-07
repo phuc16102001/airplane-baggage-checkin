@@ -1,5 +1,9 @@
+
+
+
 #[cfg(test)]
 mod tests {
+    use airplane_baggage_checking::*;
     use near_sdk::{MockedBlockchain};
     use near_sdk::{testing_env, VMContext};
 
@@ -50,7 +54,7 @@ mod tests {
         let context = get_context_airline(vec![], false);
         testing_env!(context);
 
-        let mut contract = Contract::new();
+        let mut contract = Contract::default();
         assert_eq!(
             contract.get_initialized(),
             false
@@ -72,10 +76,28 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = r#"Contract was already initialized"#
+    )]
+    fn double_init() {
+        let context = get_context_airline(vec![], false);
+        testing_env!(context);
+
+        let mut contract = Contract::default();
+        assert_eq!(
+            contract.get_initialized(),
+            false
+        );
+        
+        contract.init("phuc16102001.testnet".to_string());
+        contract.init("phuc16102001.testnet".to_string());
+    }
+
+    #[test]
     fn reset_payment_account() {
         let context = get_context_airline(vec![], false);
         testing_env!(context);
-        let mut contract = Contract::new();
+        let mut contract = Contract::default();
 
         contract.init("phuc16102001.testnet".to_string());
         contract.reset();
@@ -97,10 +119,10 @@ mod tests {
         let context_customer = get_context_customer(vec![], false);
 
         testing_env!(context_airline);
-        let mut contract = Contract::new();
+        let mut contract = Contract::default();
         contract.init("phuc16102001.testnet".to_string());
     
         testing_env!(context_customer);
-        contract.registry(1, FlightClass::First, 10.0);
+        // contract.registry(1, FlightClass::First, 10.0);
     }
 }
