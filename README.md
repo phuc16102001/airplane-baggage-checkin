@@ -105,14 +105,19 @@ near call $CONTRACT_NAME check_state '{"flight_id":1}' --accountId $CUSTOMER
 near call $CONTRACT_NAME check_class '{"flight_id":1}' --accountId $CUSTOMER
 ```
 
-### Check current baggages
+### Check the number of current baggages
 ```Bash
-near call $CONTRACT_NAME check_baggages '{"flight_id":1}' --accountId $CUSTOMER
+near call $CONTRACT_NAME check_number_baggages '{"flight_id":1}' --accountId $CUSTOMER
 ```
 
-### Check price for deposit
+### Check a baggage
 ```Bash
-near call $CONTRACT_NAME check_price '{"flight_id":1}' --accountId $CUSTOMER
+near call $CONTRACT_NAME check_baggage '{"flight_id":1, "baggage_id":0}' --accountId $CUSTOMER
+```
+
+### Check fee before depositing
+```Bash
+near call $CONTRACT_NAME check_fee '{"flight_id":1}' --accountId $CUSTOMER
 ```
 
 ## Process operations
@@ -124,7 +129,7 @@ near call $CONTRACT_NAME accept '{"flight_id":1}' --accountId $CUSTOMER --amount
 
 ### Delivering baggages
 ```Bash
-near call $CONTRACT_NAME deliver_baggage '{"flight_id":1}' --accountId $CUSTOMER
+near call $CONTRACT_NAME deliver_baggage '{"flight_id":1, "customer_id": "'$CUSTOMER'"}' --accountId $AIRLINE
 ```
 
 ### Claim baggages

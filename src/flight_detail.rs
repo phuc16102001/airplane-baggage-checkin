@@ -10,7 +10,7 @@ use crate::baggage::*;
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum FlightClass {
     First,
     Business,
@@ -26,7 +26,6 @@ pub enum FlightState {
     Delivered,
     Claimed
 }
-
 
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct FlightDetail {
@@ -88,7 +87,7 @@ impl FlightDetail {
         &self.baggages
     }
 
-    pub fn get_price(&self) -> Balance {
+    pub fn get_fee(&self) -> Balance {
         self.get_fee_strategy().calculate_fee(
             self.distance,
             &self.baggages

@@ -1,7 +1,10 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};  
+use near_sdk::{serde::{Serialize, Deserialize}};
 use crate::types::*;
 
 #[derive(BorshDeserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Baggage {
     baggage_id: BaggageId,
     baggage_weight: Weight
