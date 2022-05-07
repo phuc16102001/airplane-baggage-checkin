@@ -1,5 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, Promise};
+use near_sdk::{env, near_bindgen, Promise, Balance};
 use near_sdk::{AccountId};
 use near_sdk::collections::{UnorderedMap};
 
@@ -24,6 +24,7 @@ pub struct Contract {
     count_baggage: BaggageId
 }
 
+#[near_bindgen]
 impl Default for Contract {
     fn default() -> Self {
         Self {
@@ -38,7 +39,6 @@ impl Default for Contract {
 
 #[near_bindgen]
 impl Contract {
-
     fn _debug(&self) {
         self.assert_initialized();
 
@@ -58,8 +58,11 @@ impl Contract {
     }
 
     pub fn get_initialized(&self) -> bool {
-        self.assert_initialized();
         self.initialized
+    }
+
+    pub fn get_owner(&self) -> &String {
+        &self.owner
     }
     // ====================================================================
     pub fn init(&mut self, payment_account: AccountId) {
@@ -149,6 +152,7 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {
+                self.assert_state(&flight, FlightState::Idle);
                         
                 // Each (account, flight) can only have at most 3
                 let baggage_len: usize = flight.get_baggages().len() as usize;
@@ -177,7 +181,7 @@ impl Contract {
         }
     }
 
-    pub fn check_baggages(&mut self, flight_id: FlightId) {
+    pub fn check_baggages(&mut self, flight_id: FlightId) -> Vec<Baggage>{
         self.assert_initialized();
 
         let customer_id = env::predecessor_account_id();
@@ -185,6 +189,7 @@ impl Contract {
         match self.user_flights.get(&key) {
             Some(flight) => {
                 let baggages = flight.get_baggages();
+                let mut ret = Vec::new();
 
                 env::log(format!("Number of baggages: {}",baggages.len()).as_bytes());
                 for baggage in baggages.values(){
@@ -193,7 +198,9 @@ impl Contract {
                         baggage.get_id(), 
                         baggage.get_weight()
                     ).as_bytes());
+                    ret.push(baggage);
                 }
+                ret
             },
             None => {
                 panic!("Cannot find your flight");
@@ -201,7 +208,7 @@ impl Contract {
         }
     }
 
-    pub fn check_price(&mut self, flight_id: FlightId) {
+    pub fn check_price(&mut self, flight_id: FlightId) -> Balance {
         self.assert_initialized();
         
         let customer_id = env::predecessor_account_id();
@@ -209,7 +216,9 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(flight) => {        
-                env::log(format!("Your price: {} NEAR",flight.get_price()).as_bytes());
+                let price = flight.get_price();
+                env::log(format!("Your price: {} NEAR",&price).as_bytes());
+                price
             },
             None => {
                 panic!("Cannot find your flight");
@@ -234,7 +243,7 @@ impl Contract {
     }
 
     
-    pub fn check_class(&mut self, flight_id: FlightId) {
+    pub fn check_class(&mut self, flight_id: FlightId) -> String {
         self.assert_initialized();
         
         let customer_id = env::predecessor_account_id();
@@ -242,7 +251,9 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(flight) => {        
-                env::log(format!("Class: {:?}",flight.get_flight_class()).as_bytes());
+                let flight_class = flight.get_flight_class();
+                env::log(format!("Class: {:?}",&flight_class).as_bytes());
+                format!("{:?}",&flight_class)
             },
             None => {
                 panic!("Cannot find your flight");
@@ -258,7 +269,8 @@ impl Contract {
         let key = &(customer_id, flight_id);
 
         match self.user_flights.get(&key) {
-            Some(mut flight) => {        
+            Some(mut flight) => {    
+                self.assert_state(&flight, FlightState::Idle);
                 let fee = flight.get_price();
                 let deposit = env::attached_deposit();
                 assert_eq!(
@@ -286,6 +298,7 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
+                self.assert_state(&flight, FlightState::Idle);
                 flight.remove_baggage(baggage_id);
                 self.user_flights.insert(&key,&flight);
                 env::log("Remove baggage successfully".as_bytes());
@@ -317,10 +330,18 @@ impl Contract {
     pub fn deliver_baggage(&mut self, customer_id: AccountId, flight_id: FlightId) {
         self.assert_initialized();
 
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.payment_account,
+            "Only airline can deliver the baggages"
+        );
+
         let key = &(customer_id, flight_id);
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
+                self.assert_state(&flight, FlightState::Checked);
+
                 flight.set_state(FlightState::Delivered);
                 self.user_flights.insert(&key,&flight);
             },
@@ -339,6 +360,8 @@ impl Contract {
 
         match self.user_flights.get(&key) {
             Some(mut flight) => {        
+                self.assert_state(&flight, FlightState::Delivered);
+
                 self.remove_all_baggages(flight_id);
                 flight.set_state(FlightState::Claimed);
                 self.user_flights.insert(&key,&flight);
@@ -355,16 +378,23 @@ impl Contract {
 
     }
 
-    pub fn get_count_list(&self) -> usize{
-        self.user_flights.len() as usize
-    }
-
     // ===============================================
     fn assert_initialized(&self) {
         assert_eq!(
             self.initialized,
             true,
             "Contract was not initialized"
-        );
+        );  
+
+    }
+
+    fn assert_state(&self, flight: &FlightDetail, target_state: FlightState) {
+        if !(*flight.get_state() == target_state) {
+            panic!(
+                "You can only do this in {:?} state, not {:?}",
+                target_state,
+                flight.get_state()
+            );
+        }
     }
 }

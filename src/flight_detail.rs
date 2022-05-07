@@ -18,7 +18,7 @@ pub enum FlightClass {
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum FlightState {
     Idle,
     Checked,

@@ -1,5 +1,5 @@
 [package]
-name = "airplane-baggage-checkin"
+name = "airplane-baggage-checking"
 version = "0.1.0"
 authors = ["Do Vuong Phuc <phuc16102001@gmail.com>"]
 edition = "2018"

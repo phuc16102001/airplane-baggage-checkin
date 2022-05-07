@@ -32,7 +32,7 @@ The contract has several steps:
   - `Economy class`: 2*(total weight + distance)
 - Each `Customer` in a `flight`, can only have `at most 3 baggages`
 - Only the `Airline` can call the `deliver_baggage` method
-- Only send the money to `Airline` after `Customer` claimed their baggages
+- Every operations must follow the workflow (e.g. claim can only operate after delivering)
 
 # Folder structure
 - `baggage.rs`: The structure of a baggage
@@ -43,6 +43,9 @@ The contract has several steps:
 - `test.rs`: Unit test source
 
 # Unit test
+```Bash
+cargo test -- --nocapture
+```
 
 # Compile and build
 ```Bash
